@@ -1,10 +1,12 @@
-Akismet compatible library for checking spams. Works with Typepad Antispam
-by default, but should be useable with any Akismet compatible server.
+Akismet compatible library for checking spams.
+
+Initial form is derived from Akismetor by Ryan Bates and Levy Carneiro Jr.
+as findable at http://github.com/levycarneiro/akismetor
 
 = Usage
 
 First you need an Akismet (or Typepad Antispam) API key. Then you need
-to setup a few configuration variable.
+to setup a few configuration variable:
 
   Akismet.key  = '123456789'
   Akismet.blog = 'http://example.com'

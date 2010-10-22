@@ -20,7 +20,7 @@ begin
     s.summary = "Ruby library for the Akismet service."
     s.email = "ysbaddaden@gmail.com"
     s.homepage = "http://github.com/ysbaddaden/ruby-akismet"
-    s.description = "Akismet is basically a big machine that sucks up all the data it possibly can, looks for patterns, and learns from its mistakes. Thus far it has been highly effective at stopping spam and adapting to new techniques and attempts to evade it, and time will tell how it stands up."
+    s.description = "Ruby library for Akismet and Typepad Antispam with easy integration into a Rails 3 application."
     s.authors = ['Julien Portalier']
     s.files =  root_files + FileList["{lib}/*"]
     s.extra_rdoc_files = root_files

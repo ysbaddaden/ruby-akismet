@@ -1,7 +1,6 @@
 require 'net/http'
 
-# Akismet compatible library for checking spams. Works with Typepad Antispam
-# by default, but should be useable with any Akismet compatible server.
+# Akismet compatible library for checking spams.
 # 
 # = Usage
 # 
@@ -75,7 +74,7 @@ require 'net/http'
 #   end
 # 
 class Akismet
-  VERSION     = '0.9'.freeze
+  VERSION     = '0.9.1'.freeze
   API_VERSION = '1.1'.freeze
 
   @@host = 'rest.akismet.com'
