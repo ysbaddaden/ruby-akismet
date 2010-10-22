@@ -1,0 +1,74 @@
+Akismet compatible library for checking spams. Works with Typepad Antispam
+by default, but should be useable with any Akismet compatible server.
+
+= Usage
+
+First you need an Akismet (or Typepad Antispam) API key. Then you need
+to setup a few configuration variable.
+
+  Akismet.key  = '123456789'
+  Akismet.blog = 'http://example.com'
+
+To use Typepad Antispam, just set the host:
+
+  Akismet.host = 'api.antispam.typepad.com'
+
+Then you need to call any of the methods with a few attributes,
+and possibly an ActionDispatch::Request object.
+
+= Integrate with Ruby on Rails (3.0+)
+
+Add this gem to your Gemfile:
+
+  gem 'ruby-akismet', :require => 'akismet',
+    :git => 'git://github.com/ysbaddaden/ruby-akismet.git'
+
+Create an initializer file like <code>config/initializers/akismet.rb</code>
+with your configuration:
+
+  Akismet.key  = '123456789'
+  Akismet.blog = 'http://example.com'
+
+Then in your controller call the appropriate methods:
+
+  class CommentsController < ApplicationController
+    before_filter :set_post
+    respond_to :html, :xml
+    
+    def create
+      @comment = @post.comments.new(params[:comment])
+      @comment.spam = Akismet.spam?(akismet_attributes, request)
+      @comment.save
+      respond_with(@comment, :location => @post)
+    end
+    
+    def spam
+      @comment = Comment.find(params[:id])
+      @comment.update_attribute(:spam, false)
+      Akismet.submit_spam(akismet_attributes)
+      respond_with(@comment, :location => @post)
+    end
+    
+    def ham
+      @comment = Comment.find(params[:id])
+      @comment.update_attribute(:spam, false)
+      Akismet.submit_ham(akismet_attributes)
+      respond_with(@comment, :location => @post)
+    end
+    
+    private
+      def akismet_attributes
+        {
+          :comment_author       => @comment.author,
+          :comment_author_url   => @comment.author_url,
+          :comment_author_email => @comment.author_email,
+          :comment_content      => @comment.body,
+          :permalink            => post_url(@post)
+        }
+      end
+      
+      def set_post
+        @post = Post.find(params[:post_id])
+      end
+  end
+
