@@ -16,14 +16,17 @@ To use Typepad Antispam, just set the host:
   Akismet.host = 'api.antispam.typepad.com'
 
 Then you need to call any of the methods with a few attributes,
-and possibly an ActionDispatch::Request object.
+and possibly an <code>ActionDispatch::Request</code> object.
+
+= Documentation
+
+http://rubydoc.info/github/ysbaddaden/ruby-akismet/master/frames
 
 = Integrate with Ruby on Rails (3.0+)
 
 Add this gem to your Gemfile:
 
-  gem 'ruby-akismet', :require => 'akismet',
-    :git => 'git://github.com/ysbaddaden/ruby-akismet.git'
+  gem 'ruby-akismet', :require => 'akismet'
 
 Create an initializer file like <code>config/initializers/akismet.rb</code>
 with your configuration:

@@ -1,6 +1,7 @@
 require 'test/unit'
 require File.expand_path("../../lib/akismet.rb", __FILE__)
 
+# TODO: Test with an ActionDispatch::TestRequest object.
 class AkismetTest < Test::Unit::TestCase
   def setup
     Akismet.host = 'api.antispam.typepad.com'
