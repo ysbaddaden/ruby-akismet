@@ -1,4 +1,4 @@
-Akismet compatible library for checking spams.
+Ruby library for the Akismet anti-spam service.
 
 = Usage
 
@@ -83,6 +83,8 @@ Then in your controller call the appropriate methods (rails 3 example):
   end
 
 = Author
+
+- Julien Portalier <ysbaddaden@gmail.com>
 
 ruby-akismet is a complete rewrite of Akismetor by Ryan Bates and
 Levy Carneiro Jr. that you can find at http://github.com/levycarneiro/akismetor
