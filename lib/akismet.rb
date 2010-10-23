@@ -2,12 +2,18 @@ require 'net/http'
 
 # Akismet compatible library for checking spams.
 class Akismet
-  VERSION     = '0.9.2'.freeze
+  VERSION     = '0.9.3'.freeze
   API_VERSION = '1.1'.freeze
 
   @@host = 'rest.akismet.com'
   @@key  = nil
   @@blog = nil
+  @@extra_headers = [
+    'HTTP_REMOTE_ADDR',
+    'HTTP_CLIENT_IP',
+    'HTTP_X_FORWARDED_FOR',
+    'HTTP_CONNECTION'
+  ]
 
   class << self
     # Configure an alternate API server.
@@ -23,6 +29,16 @@ class Akismet
     # Configure your homepage URL (optional).
     def blog=(blog)
       @@blog = blog
+    end
+
+    # Configure an array of extra HTTP headers to pass to Akismet from
+    # the request.
+    # 
+    # Example:
+    # 
+    #   Akismet.extra_headers = ['HTTP_REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR']
+    def extra_headers=(headers)
+      @@extra_headers = headers
     end
 
     # Checks if a key is valid or not.
@@ -86,7 +102,6 @@ class Akismet
   end
 
   private
-    # TODO: Extract more relevant HTTP headers.
     def attributes
       @attributes[:blog] ||= @@blog
       
@@ -94,9 +109,10 @@ class Akismet
         @attributes[:comment_type] ||= 'comment'
         
         unless @request.nil?
-          @attributes[:user_ip]    ||= @request.remote_ip
-          @attributes[:user_agent] ||= @request.headers["User-Agent"]
-          @attributes[:referrer]   ||= @request.headers["Http-Referer"]
+          @attributes[:user_ip]    = @request.remote_ip
+          @attributes[:user_agent] = @request.headers["HTTP_USER_AGENT"]
+          @attributes[:referrer]   = @request.headers["HTTP_REFERER"]
+          @@extra_headers.each { |h| @attributes[h] = @request.headers[h] }
         end
       end
       
