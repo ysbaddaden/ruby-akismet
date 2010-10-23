@@ -1,8 +1,5 @@
 Akismet compatible library for checking spams.
 
-Initial form is derived from Akismetor by Ryan Bates and Levy Carneiro Jr.
-as findable at http://github.com/levycarneiro/akismetor
-
 = Usage
 
 First you need an Akismet (or Typepad Antispam) API key. Then you need
@@ -11,7 +8,7 @@ to setup a few configuration variable:
   Akismet.key  = '123456789'
   Akismet.blog = 'http://example.com'
 
-To use Typepad Antispam, just set the host:
+To use Typepad Antispam, just specify the host:
 
   Akismet.host = 'api.antispam.typepad.com'
 
@@ -22,11 +19,19 @@ and possibly an <code>ActionDispatch::Request</code> object.
 
 http://rubydoc.info/github/ysbaddaden/ruby-akismet/master/frames
 
-= Integrate with Ruby on Rails (3.0+)
+= Integrate with Ruby on Rails
 
-Add this gem to your Gemfile:
+On rails 3, add this gem to your <code>Gemfile</code>:
 
   gem 'ruby-akismet', :require => 'akismet'
+
+On rails 2, first install the gem:
+
+  gem install ruby-akismet
+
+Then add the gem to your app:
+
+  config.gem 'ruby-akismet', :lib => 'akismet'
 
 Create an initializer file like <code>config/initializers/akismet.rb</code>
 with your configuration:
@@ -34,7 +39,7 @@ with your configuration:
   Akismet.key  = '123456789'
   Akismet.blog = 'http://example.com'
 
-Then in your controller call the appropriate methods:
+Then in your controller call the appropriate methods (rails 3 example):
 
   class CommentsController < ApplicationController
     before_filter :set_post
@@ -76,4 +81,9 @@ Then in your controller call the appropriate methods:
         @post = Post.find(params[:post_id])
       end
   end
+
+= Author
+
+ruby-akismet is a complete rewrite of Akismetor by Ryan Bates and
+Levy Carneiro Jr. that you can find at http://github.com/levycarneiro/akismetor
 

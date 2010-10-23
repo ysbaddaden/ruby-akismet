@@ -17,10 +17,10 @@ begin
     root_files = FileList["README.rdoc"]
     s.name = "ruby-akismet"
     s.version = Akismet::VERSION.dup
-    s.summary = "Ruby library for the Akismet service."
+    s.summary = "Ruby library for the Akismet anti-spam service."
     s.email = "ysbaddaden@gmail.com"
     s.homepage = "http://github.com/ysbaddaden/ruby-akismet"
-    s.description = "Ruby library for Akismet and Typepad Antispam with easy integration into a Rails 3 application."
+    s.description = "Ruby library for Akismet and Typepad Antispam with simplified integration into a Rails application."
     s.authors = ['Julien Portalier']
     s.files =  root_files + FileList["{lib}/*"]
     s.extra_rdoc_files = root_files
