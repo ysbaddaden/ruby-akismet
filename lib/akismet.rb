@@ -13,7 +13,7 @@ class Akismet
   class MissingKey < StandardError
   end
 
-  VERSION     = '1.0.0.rc'.freeze
+  VERSION     = '1.0.0'.freeze
   API_VERSION = '1.1'.freeze
 
   class << self
