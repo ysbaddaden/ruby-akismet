@@ -2,6 +2,9 @@ require 'net/http'
 
 # Akismet compatible library for checking spams.
 class Akismet
+  class MissingKey < StandardError
+  end
+
   VERSION     = '0.9.3'.freeze
   API_VERSION = '1.1'.freeze
 
@@ -135,6 +138,7 @@ class Akismet
 
     def http_host
       unless @command == 'verify-key'
+        raise MissingKey.new("Required Akismet.key is nil.") unless @@key
         "#{@@key}.#{@@host}"
       else
         "#{@@host}"

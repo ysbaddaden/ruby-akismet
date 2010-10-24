@@ -32,6 +32,16 @@ class AkismetTest < Test::Unit::TestCase
     assert Akismet.valid_key?('123456789')
   end
 
+  def test_should_raise_missing_key
+    Akismet.key = nil
+    assert_raise(Akismet::MissingKey) { Akismet.spam?(valid_attributes) }
+  end
+
+  def test_should_not_raise_missing_key_for_valid_key
+    Akismet.key = nil
+    assert_nothing_raised { Akismet.valid_key?('123456789') }
+  end
+
 #  def test_invalid_key
 #    assert !Akismet.valid_key?('abc123')
 #  end
