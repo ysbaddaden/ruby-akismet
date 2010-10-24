@@ -27,27 +27,34 @@ Or generate your own:
 
 = Integrate with Ruby on Rails
 
+ruby-akismet integrates nicely with Ruby on Rails, but isn't tied to it except
+for the ActionDispatch::Request object, which isn't required. It should be
+easily integratable with your favorite framework like Sinatra and Merb.
+
 == Rails 3
 
-Add this gem to your <code>Gemfile</code>:
+Add this gem to your Gemfile:
 
   gem 'ruby-akismet', :require => 'akismet'
 
 == Rails 2
 
+First install the gem:
+
   gem install ruby-akismet
 
-Then add the gem to your app:
+Then add it to your app:
 
   config.gem 'ruby-akismet', :lib => 'akismet'
 
 == Configuration
 
-Create an initializer file like <code>config/initializers/akismet.rb</code>
+Create an initializer file like <tt>config/initializers/akismet.rb</tt>
 with your configuration:
 
   Akismet.key    = '123456789'
   Akismet.blog   = 'http://example.com'
+  Akismet.logger = Rails.logger
 
 == Usage
 

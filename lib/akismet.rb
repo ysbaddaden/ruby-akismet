@@ -1,23 +1,20 @@
 require 'net/http'
 
 # Akismet compatible library for checking spams.
+# 
+# Before calling any method, you must configure a blog (your website
+# homepage) and your Akismet or TypepadAntispam API key.
+# 
+#   Akismet.key  = '123456789'
+#   Akismet.blog = 'http://example.com'
+# 
 class Akismet
+  # Raised whenever a command is issued but the API key hasn't been configured.
   class MissingKey < StandardError
   end
 
   VERSION     = '0.9.3'.freeze
   API_VERSION = '1.1'.freeze
-
-  @@host   = 'rest.akismet.com'
-  @@key    = nil
-  @@blog   = nil
-  @@logger = nil
-  @@extra_headers = [
-    'HTTP_REMOTE_ADDR',
-    'HTTP_CLIENT_IP',
-    'HTTP_X_FORWARDED_FOR',
-    'HTTP_CONNECTION'
-  ]
 
   class << self
     # Configure an alternate API host server (defaults to
@@ -26,14 +23,26 @@ class Akismet
       @@host = host
     end
 
+    def host
+      @@host
+    end
+
     # Configure your API key (required).
     def key=(key)
       @@key = key
     end
 
-    # Configure your homepage URL (optional).
+    def key
+      @@key
+    end
+
+    # Configure your homepage URL (required).
     def blog=(blog)
       @@blog = blog
+    end
+
+    def blog
+      @@blog
     end
 
     def logger=(logger)
@@ -58,6 +67,10 @@ class Akismet
       @@extra_headers = headers
     end
 
+    def extra_headers
+      @@extra_headers
+    end
+
     # Checks if a key is valid or not.
     def valid_key?(key)
       call('verify-key', :key => key) == "valid"
@@ -67,19 +80,20 @@ class Akismet
     # 
     # Required attributes:
     # 
-    # - <code>:permalink</code>
-    # - <code>:comment_author</code>
-    # - <code>:comment_author_url</code>
-    # - <code>:comment_author_email</code>
-    # - <code>:comment_content</code>
+    # - <tt>:permalink</tt>
+    # - <tt>:comment_author</tt>
+    # - <tt>:comment_author_url</tt>
+    # - <tt>:comment_author_email</tt>
+    # - <tt>:comment_content</tt>
     # 
     # Those are also required, but will be extracted from the
-    # +ActionDispatch::Request+ object if available:
+    # <tt>ActionDispatch::Request</tt> object if available:
     # 
-    # - <code>:user_ip</code>
-    # - <code>:user_agent</code>
-    # - <code>:referer</code>
-    # - plus more relevant HTTP header from extra_headers.
+    # - <tt>:user_ip</tt>
+    # - <tt>:user_agent</tt>
+    # - <tt>:referer</tt>
+    # 
+    # Plus more relevant HTTP header from extra_headers.
     # 
     def spam?(attributes, request = nil)
       call('comment-check', attributes, request) == "true"
@@ -108,6 +122,17 @@ class Akismet
       end
   end
 
+  self.host   = 'rest.akismet.com'
+  self.key    = nil
+  self.blog   = nil
+  self.logger = nil
+  self.extra_headers = [
+    'HTTP_REMOTE_ADDR',
+    'HTTP_CLIENT_IP',
+    'HTTP_X_FORWARDED_FOR',
+    'HTTP_CONNECTION'
+  ]
+
   def initialize(command, attributes, request = nil)
     @command    = command
     @attributes = attributes
@@ -115,7 +140,7 @@ class Akismet
   end
 
   def call
-    @@logger.debug("  AKISMET  #{@command}") if @@logger && @@logger.debug?
+    self.class.logger.debug { "  AKISMET  #{@command}" } if self.class.logger
     
     http = Net::HTTP.new(http_host, 80)
     http.post(http_path, post_attributes, http_headers).body
@@ -123,7 +148,7 @@ class Akismet
 
   private
     def attributes
-      @attributes[:blog] ||= @@blog
+      @attributes[:blog] ||= self.class.blog
       
       unless @command == 'verify-key'
         @attributes[:comment_type] ||= 'comment'
@@ -132,7 +157,7 @@ class Akismet
           @attributes[:user_ip]    = @request.remote_ip
           @attributes[:user_agent] = @request.headers["HTTP_USER_AGENT"]
           @attributes[:referrer]   = @request.headers["HTTP_REFERER"]
-          @@extra_headers.each { |h| @attributes[h] = @request.headers[h] }
+          extra_headers.each { |h| @attributes[h] = @request.headers[h] }
         end
       end
       
@@ -153,10 +178,10 @@ class Akismet
 
     def http_host
       unless @command == 'verify-key'
-        raise MissingKey.new("Required Akismet.key is nil.") unless @@key
-        "#{@@key}.#{@@host}"
+        raise MissingKey.new("Required Akismet.key is nil.") unless self.class.key
+        "#{self.class.key}.#{self.class.host}"
       else
-        "#{@@host}"
+        "#{self.class.host}"
       end
     end
 
