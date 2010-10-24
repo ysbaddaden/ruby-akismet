@@ -3,7 +3,7 @@ Ruby library for the Akismet anti-spam service.
 = Usage
 
 First you need an Akismet (or Typepad Antispam) API key. Then you need
-to setup a few configuration variable:
+to setup a few configuration variables:
 
   Akismet.key  = '123456789'
   Akismet.blog = 'http://example.com'
@@ -12,20 +12,28 @@ To use Typepad Antispam, just specify the host:
 
   Akismet.host = 'api.antispam.typepad.com'
 
-Then you need to call any of the methods with a few attributes,
-and possibly an <code>ActionDispatch::Request</code> object.
+Then you need to call any of the methods with a few attributes, and possibly
+an ActionDispatch::Request object.
 
-= Documentation
+== Documentation
+
+Check rubydoc.info:
 
 http://rubydoc.info/github/ysbaddaden/ruby-akismet/master/frames
 
+Or generate your own:
+
+  ~/src/ruby-akismet$ rake rdoc
+
 = Integrate with Ruby on Rails
 
-On rails 3, add this gem to your <code>Gemfile</code>:
+== Rails 3
+
+Add this gem to your <code>Gemfile</code>:
 
   gem 'ruby-akismet', :require => 'akismet'
 
-On rails 2, first install the gem:
+== Rails 2
 
   gem install ruby-akismet
 
@@ -33,16 +41,25 @@ Then add the gem to your app:
 
   config.gem 'ruby-akismet', :lib => 'akismet'
 
+== Configuration
+
 Create an initializer file like <code>config/initializers/akismet.rb</code>
 with your configuration:
 
-  Akismet.key  = '123456789'
-  Akismet.blog = 'http://example.com'
+  Akismet.key    = '123456789'
+  Akismet.blog   = 'http://example.com'
 
-Then in your controller call the appropriate methods (rails 3 example):
+== Usage
+
+ruby-akismet is meant to be used on the controller side and not on the model
+side, because the Akismet API requires some data that's only available from
+the HTTP request --like the user and proxy IP, referer, etc.
+
+Here is a Rails 3 example:
 
   class CommentsController < ApplicationController
     before_filter :set_post
+    
     respond_to :html, :xml
     
     def create

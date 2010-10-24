@@ -16,7 +16,8 @@ class Akismet
   ]
 
   class << self
-    # Configure an alternate API server.
+    # Configure an alternate API host server (defaults to
+    # <tt>'rest.akismet.com'</tt>).
     def host=(host)
       @@host = host
     end
@@ -56,12 +57,13 @@ class Akismet
     # - <code>:comment_author_email</code>
     # - <code>:comment_content</code>
     # 
-    # Those are also required, but will be extracted from the request object:
+    # Those are also required, but will be extracted from the
+    # +ActionDispatch::Request+ object if available:
     # 
     # - <code>:user_ip</code>
     # - <code>:user_agent</code>
     # - <code>:referer</code>
-    # - plus any more relevant HTTP header.
+    # - plus more relevant HTTP header from extra_headers.
     # 
     def spam?(attributes, request = nil)
       call('comment-check', attributes, request) == "true"
@@ -79,7 +81,7 @@ class Akismet
     end
 
     # Submits a false-positive comment as non-spam to Akismet.
-    # Takes the same attributes than +spam+.
+    # Takes the same attributes than spam?.
     def submit_ham(attributes)
       call('submit-ham', attributes)
     end
