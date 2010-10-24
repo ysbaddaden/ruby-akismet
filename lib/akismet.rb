@@ -3,7 +3,7 @@ require 'net/http'
 # Akismet compatible library for checking spams.
 # 
 # Before calling any method, you must configure a blog (your website
-# homepage) and your Akismet or TypepadAntispam API key.
+# homepage) and your Akismet or Typepad Antispam API key.
 # 
 #   Akismet.key  = '123456789'
 #   Akismet.blog = 'http://example.com'
@@ -13,7 +13,7 @@ class Akismet
   class MissingKey < StandardError
   end
 
-  VERSION     = '0.9.3'.freeze
+  VERSION     = '1.0.0.rc'.freeze
   API_VERSION = '1.1'.freeze
 
   class << self
@@ -53,21 +53,36 @@ class Akismet
       @@logger
     end
 
-    # Configure an array of extra HTTP headers to pass to Akismet from
-    # the request.
+    # Configure an Array of extra HTTP headers to pass to the Akismet server
+    # to extract from the request object.
     # 
-    # Example:
+    # Defaults to:
     # 
-    #   Akismet.extra_headers = [
+    #   [
     #     'HTTP_REMOTE_ADDR',
     #     'HTTP_CLIENT_IP',
-    #     'HTTP_X_FORWARDED_FOR'
+    #     'HTTP_X_FORWARDED_FOR',
+    #     'HTTP_CONNECTION'
     #   ]
+    # 
+    # Examples:
+    # 
+    #   # replaces the actual list:
+    #   Akismet.extra_headers = ['HTTP_REMOTE_ADDR']
+    #   
+    #   # appends a header to the list:
+    #   Akismet.extra_headers << 'HTTP_ACCEPT_CHARSET'
+    #   
+    #   # appends multiple headers to the list:
+    #   Akismet.extra_headers << ['HTTP_ACCEPT_CHARSET', 'HTTP_ACCEPT_LANGUAGE']
+    # 
     def extra_headers=(headers)
       @@extra_headers = headers
     end
 
     def extra_headers
+      @@extra_headers.flatten!
+      @@extra_headers.uniq!
       @@extra_headers
     end
 
@@ -87,13 +102,18 @@ class Akismet
     # - <tt>:comment_content</tt>
     # 
     # Those are also required, but will be extracted from the
-    # <tt>ActionDispatch::Request</tt> object if available:
+    # +request+ object if available:
     # 
     # - <tt>:user_ip</tt>
     # - <tt>:user_agent</tt>
-    # - <tt>:referer</tt>
+    # - <tt>:referrer</tt> (check spelling!)
     # 
-    # Plus more relevant HTTP header from extra_headers.
+    # Plus more relevant HTTP headers from extra_headers.
+    # 
+    # Note that request is supposed to be an instance of
+    # ActionDispatch::Request or ActionController::Request. If not, the object
+    # must respond to +remote_ip+ (IP as string) and +headers+
+    # (an array of HTTP headers).
     # 
     def spam?(attributes, request = nil)
       call('comment-check', attributes, request) == "true"
@@ -140,7 +160,7 @@ class Akismet
   end
 
   def call
-    self.class.logger.debug { "  AKISMET  #{@command}" } if self.class.logger
+    self.class.logger.debug { "  AKISMET  #{@command} #{post_attributes}" } if self.class.logger
     
     http = Net::HTTP.new(http_host, 80)
     http.post(http_path, post_attributes, http_headers).body
@@ -157,7 +177,10 @@ class Akismet
           @attributes[:user_ip]    = @request.remote_ip
           @attributes[:user_agent] = @request.headers["HTTP_USER_AGENT"]
           @attributes[:referrer]   = @request.headers["HTTP_REFERER"]
-          extra_headers.each { |h| @attributes[h] = @request.headers[h] }
+          
+          self.class.extra_headers.each do |h|
+            @attributes[h] = @request.headers[h]
+          end
         end
       end
       
