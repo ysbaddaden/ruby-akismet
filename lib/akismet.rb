@@ -8,9 +8,10 @@ class Akismet
   VERSION     = '0.9.3'.freeze
   API_VERSION = '1.1'.freeze
 
-  @@host = 'rest.akismet.com'
-  @@key  = nil
-  @@blog = nil
+  @@host   = 'rest.akismet.com'
+  @@key    = nil
+  @@blog   = nil
+  @@logger = nil
   @@extra_headers = [
     'HTTP_REMOTE_ADDR',
     'HTTP_CLIENT_IP',
@@ -35,12 +36,24 @@ class Akismet
       @@blog = blog
     end
 
+    def logger=(logger)
+      @@logger = logger
+    end
+
+    def logger
+      @@logger
+    end
+
     # Configure an array of extra HTTP headers to pass to Akismet from
     # the request.
     # 
     # Example:
     # 
-    #   Akismet.extra_headers = ['HTTP_REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR']
+    #   Akismet.extra_headers = [
+    #     'HTTP_REMOTE_ADDR',
+    #     'HTTP_CLIENT_IP',
+    #     'HTTP_X_FORWARDED_FOR'
+    #   ]
     def extra_headers=(headers)
       @@extra_headers = headers
     end
@@ -102,6 +115,8 @@ class Akismet
   end
 
   def call
+    @@logger.debug("  AKISMET  #{@command}") if @@logger && @@logger.debug?
+    
     http = Net::HTTP.new(http_host, 80)
     http.post(http_path, post_attributes, http_headers).body
   end

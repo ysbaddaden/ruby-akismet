@@ -1,4 +1,5 @@
 require 'test/unit'
+require 'logger'
 require File.expand_path("../../lib/akismet.rb", __FILE__)
 
 # TODO: Test with an ActionDispatch::TestRequest object.
@@ -7,6 +8,9 @@ class AkismetTest < Test::Unit::TestCase
     Akismet.host = 'api.antispam.typepad.com'
     Akismet.key  = '123456789'
     Akismet.blog = 'http://www.example.com/'
+    
+    Akismet.logger = Logger.new(File.expand_path("../test.log", __FILE__))
+    Akismet.logger.level = Logger::DEBUG
   end
 
   def valid_attributes
@@ -32,6 +36,15 @@ class AkismetTest < Test::Unit::TestCase
     assert Akismet.valid_key?('123456789')
   end
 
+#  def test_invalid_key
+#    assert !Akismet.valid_key?('abc123')
+#  end
+
+  def test_should_not_fail_with_no_logger
+    Akismet.logger = nil
+    assert Akismet.valid_key?('123456789')
+  end
+
   def test_should_raise_missing_key
     Akismet.key = nil
     assert_raise(Akismet::MissingKey) { Akismet.spam?(valid_attributes) }
@@ -41,10 +54,6 @@ class AkismetTest < Test::Unit::TestCase
     Akismet.key = nil
     assert_nothing_raised { Akismet.valid_key?('123456789') }
   end
-
-#  def test_invalid_key
-#    assert !Akismet.valid_key?('abc123')
-#  end
 
   def test_spam
     assert Akismet.spam?(invalid_attributes)
