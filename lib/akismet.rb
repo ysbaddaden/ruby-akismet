@@ -116,12 +116,12 @@ class Akismet
     # (an array of HTTP headers).
     # 
     def spam?(attributes, request = nil)
-      call('comment-check', attributes, request) == "true"
+      call('comment-check', attributes, request, %w[true false]) == "true"
     end
 
     # Checks if a comment is ham. Takes the same arguments than spam?.
     def ham?(attributes, request = nil)
-      call('comment-check', attributes, request) == "false"
+      call('comment-check', attributes, request, %w[true false]) == "false"
     end
 
     # Submits a spam comment to Akismet that hadn't been recognized
@@ -137,8 +137,8 @@ class Akismet
     end
 
     private
-      def call(command, attributes, request = nil)
-        new(command, attributes, request).call
+      def call(command, attributes, request = nil, valid_results = nil)
+        new(command, attributes, request).call(valid_results)
       end
   end
 
@@ -159,14 +159,27 @@ class Akismet
     @request    = request
   end
 
-  def call
-    self.class.logger.debug { "  AKISMET  #{@command} #{post_attributes}" } if self.class.logger
+  def call(valid_results = nil)
+    logger_debug "  AKISMET  #{@command} #{post_attributes}"
     
     http = Net::HTTP.new(http_host, 80)
-    http.post(http_path, post_attributes, http_headers).body
+    akismet_response = http.post(http_path, post_attributes, http_headers).body
+    
+    if valid_results && valid_results.respond_to?(:include?)
+      unless valid_results.include?(akismet_response)
+        logger_debug " *** Erro: #{akismet_response}" if self.class.logger
+        raise "Something wrong: #{akismet_response}" 
+      end
+    end
+    
+    akismet_response
   end
 
   private
+    def logger_debug(message)
+      self.class.logger.debug { message } if self.class.logger
+    end
+    
     def attributes
       @attributes[:blog] ||= self.class.blog
       
